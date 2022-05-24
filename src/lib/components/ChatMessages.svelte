@@ -6,6 +6,7 @@
 
     export let messages = []
     export let isLoading = false
+    export let isChooseTime = false
 
     const dispatch = createEventDispatcher();
 
@@ -24,7 +25,7 @@
     }
 
     const btnClicked = (val) => {
-        dispatch('btn-clicked', val)
+        dispatch('command-clicked', '/' + val.toLowerCase().replace(/\s/g, '-'))
     }
 </script>
 
@@ -32,12 +33,16 @@
     {#each messages as { blocks, isUser }}
         <div class="flex gap-1.5 mb-[10px] last:mb-0" class:justify-end={isUser}>
             {#if !isUser}
-                <div class="h-[30px] w-[30px] overflow-hidden rounded-full bg-[#D2E0F1] shrink-0" />
+                <img class="h-[30px] w-[30px] overflow-hidden rounded-full bg-[#D2E0F1] shrink-0" 
+                    src="/assets/runday-logo.png" 
+                    alt="runday.io avatar">
             {/if}
             <div class="flex flex-col gap-3">
                 {#each blocks as { message, commands, link, button }}
                     {#if message}
-                        <p class="px-[12px] py-[10px] bg-[#E8E8E8] rounded-lg rounded-tl-none text-sm" class:user-message={isUser}>
+                        <p class="px-[12px] py-[10px] bg-[#E8E8E8] rounded-lg rounded-tl-none text-sm font-medium" 
+                            class:user-message={isUser}
+                            class:text-blue-600={message.includes('/')}>
                             {message}
                         </p>
                     {/if}
@@ -68,7 +73,9 @@
 
     {#if isLoading}
         <div class="flex gap-1.5 mb-[10px] last:mb-0"> 
-            <div class="h-[30px] w-[30px] overflow-hidden rounded-full bg-[#D2E0F1] shrink-0" />
+            <img class="h-[30px] w-[30px] overflow-hidden rounded-full bg-[#D2E0F1] shrink-0" 
+                src="/assets/runday-logo.png" 
+                alt="runday.io avatar">
 
             <div class="w-[150px] h-[40px] bg-[#E8E8E8] rounded-lg rounded-tl-none text-sm relative">
                 <span class="absolute inset-0 grid place-items-center"> 
@@ -80,7 +87,9 @@
         </div>
     {/if}
 
-    <SelectTime on:submit={({detail}) => console.log(detail)}/>
+    {#if isChooseTime}
+        <SelectTime on:submit={({detail}) => dispatch('submit-time', detail)}/>
+    {/if}
 </div>
 
 <style>

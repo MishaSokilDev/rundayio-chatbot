@@ -3,20 +3,26 @@
   	import TailwindCss from './lib/components/TailwindCSS.svelte';
 	import ChatMessages from './lib/components/ChatMessages.svelte'
 	import ChatInput from './lib/components/ChatInput.svelte'
+	
+	import BotResMsg from './lib/config/BotResMsg'
+
+	import { onMount } from 'svelte';
 
 	let isChatOpen = false
 
-	let messages = [{
-		blocks: [
-			{
-				message: '👋 Hey there, nice to meet you! I’m Sunny and I’d like to welcome you  to [business name]. Let me know if you have any questions or need help with anything and I’ll be happy to help!'
-			}, {
-				commands: ['create meet'],
-			}
-		]
-	}]
+	let messages = []
 
 	let botLoading = false
+
+	let isChooseTime = false
+
+	let convStatus = '/menu'
+
+	let submitInfo = {
+		email: '',
+		name: '',
+		time: ''
+	}
 
 	const submitInpt = (val) => {
 
@@ -28,30 +34,72 @@
 			{ 
 				blocks: [{ message: val }],
 				isUser: true }
-		]
+		]		
 
-		botRes()
+		
+		if (val[0] === '/') {
+			convStatus = val
+			return botRes()
+		}
+
+		switch (convStatus) {
+			case ('/create-meeting'):
+			case ('/create-meeting:error'):
+				const isEmail = /\S+@\S+\.\S+/;
+				if (isEmail.test(val)) {
+					convStatus = '/create-meeting:name'
+					submitInfo.email = val
+				}
+				else 
+					convStatus = '/create-meeting:error'
+				botRes()
+				break
+			case ('/create-meeting:name'): 
+			case ('/create-meeting:name:error'): 
+				const [ first, last ] = val.split(' ')
+
+				if (first && last) {
+					convStatus = '/create-meeting:time'
+					submitInfo.name = val
+				}
+				else	
+					convStatus = '/create-meeting:name:error'
+				botRes()
+				break
+		}
 	}
 
-	const botRes = () => {
+	const botRes = (blocks) => {
 		botLoading = true
 
 		setTimeout(() => {
 			messages = [
 			...messages, 
 				{ 
-					blocks: [{ message: 'test' }]
+					blocks: BotResMsg(convStatus, blocks)
 				}
 			]
-
+			if (convStatus === '/create-meeting:time')
+				isChooseTime = true
 			botLoading = false
-		}, 1000)
+		}, 250)
+	}
+
+	onMount(() => {
+		botRes()
+	})
+
+	const submitCreateMeeting = () => {
+		convStatus = '/create-meeting:success'
+		botRes([{
+			message: `email: ${submitInfo.email}\nName: ${submitInfo.name}\n time: ${submitInfo.time}`
+		}])
 	}
 </script>
 
 <TailwindCss />
 
-<main class="fixed right-0 bottom-0">
+<aside class="fixed right-0 bottom-0 top-0 sm:top-[20vh]">
 	{#if !isChatOpen}
 		<button class="w-[60px] h-[60px] rounded-full bg-[#5BA2FF] absolute right-[20px] bottom-[20px] text-white grid place-items-center p-3" 
 			on:click={() => isChatOpen = true}>
@@ -60,7 +108,7 @@
 			</svg>
 		</button>
 		{:else}
-		<section class="h-[80vh] max-h-[600px] max-w-[400px] w-[95vw] rounded-tl-lg overflow-hidden flex flex-col bg-white drop-shadow-2xl">
+		<section class="h-full sm:max-w-[450px] float-right sm:rounded-tl-lg rounded-none overflow-hidden flex flex-col bg-white drop-shadow-2xl">
 			<div class="px-[20px] py-[16px] bg-[#5BA2FF] flex justify-center items-center gap-4">
 				<h2 class="text-white text-lg font-bold">
 					Runday Chat	
@@ -77,11 +125,16 @@
 				</button>
 			</div>
 
-			<ChatMessages {messages} isLoading={botLoading} 
-				on:btn-clicked={(e) => submitInpt(e.detail)}/>
+			<ChatMessages {messages} isLoading={botLoading} {isChooseTime}
+				on:command-clicked={(e) => submitInpt(e.detail)}
+				on:submit-time={({detail}) => {
+					submitInfo.time = detail.utc().format()
+					isChooseTime = false
+					submitCreateMeeting()
+				}}/>
 
 			<ChatInput isLoading={botLoading} 
 				on:submit={(e) => submitInpt(e.detail)}/>
 		</section>
 	{/if}
-</main>
+</aside>

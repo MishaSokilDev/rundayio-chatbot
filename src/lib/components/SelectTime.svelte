@@ -1,7 +1,7 @@
 <script>
 // @ts-nocheck
     import { createEventDispatcher } from 'svelte';
-    import dayjs from 'dayjs'
+    import dayjs from '../config/dayjs'
     import { onMount } from 'svelte';
 
     const dispatch = createEventDispatcher();
@@ -122,11 +122,11 @@
 
 <div class="w-full p-3">
     <h2 class="font-semibold mb-3">
-        February
+        {dayjs().format('MMM')}
     </h2>
     <div class="grid grid-cols-7 gap-1">
         {#each pickDateArr as { title, day, value }, i}
-            <button class="rounded-full text-center py-2.5 font-semibold" 
+            <button class="rounded-full text-center py-2.5 font-semibold transition-colors" 
                 class:selected-day={value === selectedDate.selectedDay}
                 on:click={() => {
                     selectedDate.selectedDay = value
@@ -144,12 +144,12 @@
         {/each}
     </div>
     <h2 class="font-semibold my-3">
-        Meet Time
+        🕒 Select Time:
     </h2>
     <div class="grid grid-cols-3 gap-2.5">
         {#if hoursArr[selectedDate.selectedDay].length}
             {#each hoursArr[selectedDate.selectedDay] as item}
-                <button class="text-center font-semibold border-[1px] bg-white border-black rounded-full py-2"
+                <button class="text-center font-semibold border-2 bg-white border-gray-300 rounded-md py-2 transition-colors"
                     class:selected-time={item === selectedDate.selectedTime}
                     on:click={() => selectedDate.selectedTime = item}>
                     {item}  
@@ -179,6 +179,6 @@
     }
 
     .selected-time {
-        @apply bg-[#5BA2FF] border-[#5BA2FF] text-white;
+        @apply bg-[#CCE2FF] border-[#5BA2FF];
     } 
 </style>
