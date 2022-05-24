@@ -2,6 +2,8 @@
     import { tick } from "svelte";
     import { createEventDispatcher } from 'svelte';
 
+    import SelectTime from './SelectTime.svelte'
+
     export let messages = []
     export let isLoading = false
 
@@ -27,26 +29,37 @@
 </script>
 
 <div class="px-[10px] py-[25px] overflow-y-auto h-full scroll-smooth" bind:this={container}>
-    {#each messages as { blocks, isUser }, i}
+    {#each messages as { blocks, isUser }}
         <div class="flex gap-1.5 mb-[10px] last:mb-0" class:justify-end={isUser}>
             {#if !isUser}
                 <div class="h-[30px] w-[30px] overflow-hidden rounded-full bg-[#D2E0F1] shrink-0" />
             {/if}
             <div class="flex flex-col gap-3">
-                {#each blocks as { message, buttons }, y}
+                {#each blocks as { message, commands, link, button }}
                     {#if message}
                         <p class="px-[12px] py-[10px] bg-[#E8E8E8] rounded-lg rounded-tl-none text-sm" class:user-message={isUser}>
                             {message}
                         </p>
-                        {:else if buttons[0]}
+                    {/if}
+                    {#if commands && commands[0]}
                         <div class="flex flex-wrap gap-2 justify-center">
-                            {#each buttons as value}
+                            {#each commands as value}
                                 <button on:click={() => btnClicked(value)}
                                     class="border-2 border-blue-400 rounded-full px-2.5 py-1 bg-blue-100 font-semibold text-blue-800">
                                     {value}
                                 </button>
                             {/each}
-                        </div>            
+                        </div>   
+                    {/if}      
+                    {#if link}
+                        <a href={link.href} class="w-full text-center font-semibold text-lg underline underline-offset-4 text-blue-800">
+                            {link.title}
+                        </a>
+                    {/if}   
+                    {#if button}
+                        <button on:click={button.callback} class="w-full rounded-lg font-semibold text-lg py-3 bg-blue-500 text-white">
+                            {button.title}
+                        </button>
                     {/if}
                 {/each}
             </div>
@@ -66,6 +79,8 @@
             </div>   
         </div>
     {/if}
+
+    <SelectTime on:submit={({detail}) => console.log(detail)}/>
 </div>
 
 <style>

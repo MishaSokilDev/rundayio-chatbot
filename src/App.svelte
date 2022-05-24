@@ -11,7 +11,7 @@
 			{
 				message: '👋 Hey there, nice to meet you! I’m Sunny and I’d like to welcome you  to [business name]. Let me know if you have any questions or need help with anything and I’ll be happy to help!'
 			}, {
-				buttons: ['create meet', 'loremips', 'dsadas dsad']
+				commands: ['create meet'],
 			}
 		]
 	}]
@@ -20,8 +20,8 @@
 
 	const submitInpt = (val) => {
 
-		//remove last buttons menus
-		messages[messages.length - 1].blocks = messages[messages.length - 1].blocks.filter(el => !el.buttons)
+		//remove last commands menus
+		messages[messages.length - 1].blocks = messages[messages.length - 1].blocks.filter(el => el.commands = [])
 
 		messages = [	
 			...messages, 
