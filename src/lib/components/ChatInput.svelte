@@ -1,15 +1,17 @@
 <script>
     import { createEventDispatcher } from 'svelte';
 
+    export let isLoading
+
     const dispatch = createEventDispatcher();
 
     let inputVal
 
     const submitForm = () => {
-        if (inputVal) {
+        if (inputVal && !isLoading) {
             dispatch('submit', inputVal)
-            inputVal = ''
         }
+        inputVal = ''
     }
 </script>
 

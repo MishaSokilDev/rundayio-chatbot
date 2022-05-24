@@ -1,16 +1,52 @@
 <script>
-  	import TailwindCss from './lib/TailwindCSS.svelte';
-	import ChatMessages from './lib/ChatMessages.svelte'
-	import ChatInput from './lib/ChatInput.svelte'
-
-	let messages = [{
-		message: '👋 Hey there, nice to meet you! I’m Sunny and I’d like to welcome you  to [business name]. Let me know if you have any questions or need help with anything and I’ll be happy to help!'
-	}, {
-		message: 'Lorem ipsr',
-		isUser: true
-	}]
+	// @ts-nocheck
+  	import TailwindCss from './lib/components/TailwindCSS.svelte';
+	import ChatMessages from './lib/components/ChatMessages.svelte'
+	import ChatInput from './lib/components/ChatInput.svelte'
 
 	let isChatOpen = false
+
+	let messages = [{
+		blocks: [
+			{
+				message: '👋 Hey there, nice to meet you! I’m Sunny and I’d like to welcome you  to [business name]. Let me know if you have any questions or need help with anything and I’ll be happy to help!'
+			}, {
+				buttons: ['create meet', 'loremips', 'dsadas dsad']
+			}
+		]
+	}]
+
+	let botLoading = false
+
+	const submitInpt = (val) => {
+
+		//remove last buttons menus
+		messages[messages.length - 1].blocks = messages[messages.length - 1].blocks.filter(el => !el.buttons)
+
+		messages = [	
+			...messages, 
+			{ 
+				blocks: [{ message: val }],
+				isUser: true }
+		]
+
+		botRes()
+	}
+
+	const botRes = () => {
+		botLoading = true
+
+		setTimeout(() => {
+			messages = [
+			...messages, 
+				{ 
+					blocks: [{ message: 'test' }]
+				}
+			]
+
+			botLoading = false
+		}, 1000)
+	}
 </script>
 
 <TailwindCss />
@@ -40,8 +76,12 @@
 					</svg>
 				</button>
 			</div>
-			<ChatMessages {messages}/>
-			<ChatInput on:submit={(e) => messages = [...messages, {message: e.detail, isUser: true}]}/>
+
+			<ChatMessages {messages} isLoading={botLoading} 
+				on:btn-clicked={(e) => submitInpt(e.detail)}/>
+
+			<ChatInput isLoading={botLoading} 
+				on:submit={(e) => submitInpt(e.detail)}/>
 		</section>
 	{/if}
 </main>
