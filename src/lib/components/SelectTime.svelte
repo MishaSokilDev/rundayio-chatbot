@@ -1,7 +1,9 @@
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
     import dayjs from '../config/dayjs'
-    import { onMount } from 'svelte';
+    import getUsetTime from '../api/getUserTime'
+
+    import BaseButton from './BaseButton.svelte';
 
     const dispatch = createEventDispatcher();
 
@@ -75,8 +77,7 @@
         let res: string[][] = []
         const startOfDay = dayjs().startOf('day')
 
-        for (const {
-                day_of_week, 
+        for (const { 
                 start_seconds, 
                 end_seconds } of time.availability) {
 
@@ -93,8 +94,7 @@
                 }
             }
         }
-        console.log(Object.assign({}, res))
-        return res
+        return Object.assign({}, res)
     }
 
     let pickDateArr: PickDate[] = []
@@ -119,7 +119,17 @@
         selectedDate.selectedDay = pickDateArr[0].value
 
         hoursArr = generateTime()
+        // getUsetTime()
     })
+
+    let isValid = true
+
+    $: {
+        if (selectedDate.dateIndex + 1 && selectedDate.selectedTime && hoursArr[selectedDate.selectedDay].length)
+            isValid = true
+        else
+            isValid = false
+    }
 
     const submitTime = () => {
         let res = dayjs().startOf('day').add(selectedDate.dateIndex, 'day')
@@ -170,10 +180,10 @@
             </p>
         {/if}
     </div>
-    <button class="w-full rounded-lg font-semibold text-lg py-2 mt-3 bg-blue-500 text-white"
-        on:click={submitTime}>
-        Submit time
-    </button>
+    <BaseButton title="Submit time"
+        styles="mt-3"
+        isDisabled={!isValid}
+        on:click={submitTime}/>
 </div>
 
 <style>

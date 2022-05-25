@@ -3,6 +3,7 @@
     import { createEventDispatcher } from 'svelte';
 
     import SelectTime from './SelectTime.svelte'
+    import BaseButton from './BaseButton.svelte';
 
     import type { Messages } from '../types/messages'
 
@@ -64,9 +65,8 @@
                         </a>
                     {/if}   
                     {#if button}
-                        <button on:click={button.callback} class="w-full rounded-lg font-semibold py-3 bg-blue-500 text-white">
-                            {button.title}
-                        </button>
+                        <BaseButton title={button.title}
+                            on:click={button.callback}/>
                     {/if}
                 {/each}
             </div>

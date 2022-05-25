@@ -4,6 +4,8 @@
 	
 	import BotResMsg from './lib/config/BotResMsg'
 
+	import dayjs from './lib/config/dayjs'
+
 	import { onMount } from 'svelte';
 
 	import type { Block, Messages } from './lib/types/messages'
@@ -19,9 +21,14 @@
 	let convStatus = '/menu'
 
 	let submitInfo = {
-		email: '',
-		name: '',
-		time: ''
+		first_name: '',
+		last_name: '',
+		start_time: new Date(),
+		invitees: [
+			{
+				email: ''
+			}
+		]
 	}
 
 	const submitInpt = (val: string) => {
@@ -39,7 +46,7 @@
 		
 		if (val[0] === '/') {
 			convStatus = val
-			return botRes()
+			return botResCommdands()
 		}
 
 		switch (convStatus) {
@@ -48,11 +55,11 @@
 				const isEmail = /\S+@\S+\.\S+/;
 				if (isEmail.test(val)) {
 					convStatus = '/create-meeting:name'
-					submitInfo.email = val
+					submitInfo.invitees[0].email = val
 				}
 				else 
 					convStatus = '/create-meeting:error'
-				botRes()
+				botResCommdands()
 				break
 			case ('/create-meeting:name'): 
 			case ('/create-meeting:name:error'): 
@@ -60,16 +67,36 @@
 
 				if (first && last) {
 					convStatus = '/create-meeting:time'
-					submitInfo.name = val
+					submitInfo.first_name = first
+					submitInfo.last_name = last
 				}
 				else	
 					convStatus = '/create-meeting:name:error'
-				botRes()
+				botResCommdands()
+				break
+			default:
+				botResMessages(val)
 				break
 		}
 	}
 
-	const botRes = (blocks?: Block[]) => {
+	const botResMessages = (val: string) => {
+		botLoading = true
+
+		setTimeout(() => {
+			messages = [
+			...messages, 
+				{ 
+					blocks: [{
+						message: 'Bot repeat: ' + val
+					}]
+				}
+			]
+			botLoading = false
+		}, 250)	
+	}
+
+	const botResCommdands = (blocks?: Block[]) => {
 		botLoading = true
 
 		setTimeout(() => {
@@ -86,13 +113,18 @@
 	}
 
 	onMount(() => {
-		botRes()
+		window.RUNDAY_IO_USER_ID = 'test'
+		console.log(window.RUNDAY_IO_USER_ID)
+		botResCommdands()
 	})
 
 	const submitCreateMeeting = () => {
 		convStatus = '/create-meeting:success'
-		botRes([{
-			message: `<strong>MEETING CREATED!🎉</strong><br>Email: ${submitInfo.email}<br>Name: ${submitInfo.name}<br>Time: ${submitInfo.time}`,
+		botResCommdands([{
+			message: `<strong>MEETING CREATED!🎉</strong><br>
+				Email: ${submitInfo.invitees[0].email}<br>
+				Name: ${submitInfo.first_name + ' ' + submitInfo.last_name}<br>
+				Time: ${dayjs(submitInfo.start_time).format('dddd, MMMM D hA')}`,
 			button: {
 				title: 'Copy Meeting Link',
 				callback: () => console.log('copy meet')
@@ -130,7 +162,7 @@
 			<ChatMessages {messages} isLoading={botLoading} {isChooseTime}
 				on:command-clicked={(e) => submitInpt(e.detail)}
 				on:submit-time={({detail}) => {
-					submitInfo.time = detail.utc().format('dddd, MMMM D hA')
+					submitInfo.start_time = detail.utc().toDate()
 					isChooseTime = false
 					submitCreateMeeting()
 				}}/>
