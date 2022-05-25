@@ -1,11 +1,11 @@
-<script>
+<script lang="ts">
     import { createEventDispatcher } from 'svelte';
 
-    export let isLoading
+    export let isLoading: boolean
 
     const dispatch = createEventDispatcher();
 
-    let inputVal
+    let inputVal = ''
 
     const submitForm = () => {
         if (inputVal && !isLoading) {

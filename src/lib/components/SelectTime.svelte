@@ -1,5 +1,4 @@
-<script>
-// @ts-nocheck
+<script lang="ts">
     import { createEventDispatcher } from 'svelte';
     import dayjs from '../config/dayjs'
     import { onMount } from 'svelte';
@@ -7,46 +6,47 @@
     const dispatch = createEventDispatcher();
 
     const time = {
-    "name": "Pulse Wave",
-    "timezone": "GMT-0700 (America/Los_Angeles)",
-    "avatar": "https://runday.s3.us-west-2.amazonaws.com/userProfilePicture/dev@pulsewavelabs-com.gif",
-    "availability": [
-        {
-        "day_of_week": 0,
-        "start_seconds": 0,
-        "end_seconds": 0
-        },
-        {
-        "day_of_week": 1,
-        "start_seconds": 21600,
-        "end_seconds": 50400
-        },  
-        {
-        "day_of_week": 2,
-        "start_seconds": 21600,
-        "end_seconds": 50400
-        },
-        {
-        "day_of_week": 3,
-        "start_seconds": 21600,
-        "end_seconds": 50400
-        },
-        {
-        "day_of_week": 4,
-        "start_seconds": 21600,
-        "end_seconds": 50400
-        },
-        {
-        "day_of_week": 5,
-        "start_seconds": 21600,
-        "end_seconds": 50400
-        },
-        {
-        "day_of_week": 6,
-        "start_seconds": 0,
-        "end_seconds": 0
-        }
-    ]}
+        "name": "Pulse Wave",
+        "timezone": "GMT-0700 (America/Los_Angeles)",
+        "avatar": "https://runday.s3.us-west-2.amazonaws.com/userProfilePicture/dev@pulsewavelabs-com.gif",
+        "availability": [
+            {
+            "day_of_week": 0,
+            "start_seconds": 0,
+            "end_seconds": 0
+            },
+            {
+            "day_of_week": 1,
+            "start_seconds": 21600,
+            "end_seconds": 50400
+            },  
+            {
+            "day_of_week": 2,
+            "start_seconds": 21600,
+            "end_seconds": 50400
+            },
+            {
+            "day_of_week": 3,
+            "start_seconds": 21600,
+            "end_seconds": 50400
+            },
+            {
+            "day_of_week": 4,
+            "start_seconds": 21600,
+            "end_seconds": 50400
+            },
+            {
+            "day_of_week": 5,
+            "start_seconds": 21600,
+            "end_seconds": 50400
+            },
+            {
+            "day_of_week": 6,
+            "start_seconds": 0,
+            "end_seconds": 0
+            }
+        ]}
+
 
     const generateDates = () => {
         let accDate = dayjs()
@@ -63,8 +63,16 @@
         return res
     }
 
+    interface PickDate {
+        title: string,
+        day: string,
+        value: number
+    }
+
+    type HoursArr =  { [key: number]: string[] }
+
     const generateTime = () => {
-        let res = {}
+        let res: string[][] = []
         const startOfDay = dayjs().startOf('day')
 
         for (const {
@@ -72,37 +80,38 @@
                 start_seconds, 
                 end_seconds } of time.availability) {
 
-            res[day_of_week + ''] = []
+            res.push([])
 
             if (end_seconds > start_seconds) {
                 const endTime = dayjs(startOfDay.valueOf() + end_seconds * 1000)
                 let startTime = dayjs(startOfDay.valueOf() + start_seconds * 1000)
                 
                 while (endTime.valueOf() >= startTime.valueOf()) {
-                    res[day_of_week].push(startTime.format('h A'))
+                    res[res.length - 1].push(startTime.format('h A'))
 
                     startTime = startTime.add(1, 'hour')
                 }
             }
         }
-
+        console.log(Object.assign({}, res))
         return res
     }
 
-    let pickDateArr = []
-    let hoursArr = {
-        '0': [],
-        '1': [],
-        '2': [],
-        '3': [],
-        '4': [],
-        '5': [],
-        '6': []
+    let pickDateArr: PickDate[] = []
+
+    let hoursArr: HoursArr = {
+        0: [],
+        1: [],
+        2: [],
+        3: [],
+        4: [],
+        5: [],
+        6: []
     }
 
     let selectedDate = {
-        dateIndex: '0',
-        selectedDay: '0',
+        dateIndex: 0,
+        selectedDay: 0,
         selectedTime: ''
     }
     onMount(() => {
@@ -115,7 +124,7 @@
     const submitTime = () => {
         let res = dayjs().startOf('day').add(selectedDate.dateIndex, 'day')
         dispatch('submit',
-            res.add(selectedDate.selectedTime.split(' ')[0], 'hours')
+            res.add(Number(selectedDate.selectedTime.split(' ')[0]), 'hours')
         )
     }
 </script>

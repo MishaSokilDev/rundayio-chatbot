@@ -1,6 +1,4 @@
-<script>
-	// @ts-nocheck
-  	import TailwindCss from './lib/components/TailwindCSS.svelte';
+<script lang="ts">
 	import ChatMessages from './lib/components/ChatMessages.svelte'
 	import ChatInput from './lib/components/ChatInput.svelte'
 	
@@ -8,9 +6,11 @@
 
 	import { onMount } from 'svelte';
 
+	import type { Block, Messages } from './lib/types/messages'
+
 	let isChatOpen = false
 
-	let messages = []
+	let messages: Messages[] = []
 
 	let botLoading = false
 
@@ -24,7 +24,7 @@
 		time: ''
 	}
 
-	const submitInpt = (val) => {
+	const submitInpt = (val: string) => {
 
 		//remove last commands menus
 		messages[messages.length - 1].blocks = messages[messages.length - 1].blocks.filter(el => el.commands = [])
@@ -69,7 +69,7 @@
 		}
 	}
 
-	const botRes = (blocks) => {
+	const botRes = (blocks?: Block[]) => {
 		botLoading = true
 
 		setTimeout(() => {
@@ -92,12 +92,14 @@
 	const submitCreateMeeting = () => {
 		convStatus = '/create-meeting:success'
 		botRes([{
-			message: `email: ${submitInfo.email}\nName: ${submitInfo.name}\n time: ${submitInfo.time}`
+			message: `<strong>MEETING CREATED!🎉</strong><br>Email: ${submitInfo.email}<br>Name: ${submitInfo.name}<br>Time: ${submitInfo.time}`,
+			button: {
+				title: 'Copy Meeting Link',
+				callback: () => console.log('copy meet')
+			}
 		}])
 	}
 </script>
-
-<TailwindCss />
 
 <aside class="fixed right-0 bottom-0 top-0 sm:top-[20vh]">
 	{#if !isChatOpen}
@@ -128,7 +130,7 @@
 			<ChatMessages {messages} isLoading={botLoading} {isChooseTime}
 				on:command-clicked={(e) => submitInpt(e.detail)}
 				on:submit-time={({detail}) => {
-					submitInfo.time = detail.utc().format()
+					submitInfo.time = detail.utc().format('dddd, MMMM D hA')
 					isChooseTime = false
 					submitCreateMeeting()
 				}}/>
@@ -138,3 +140,9 @@
 		</section>
 	{/if}
 </aside>
+
+<style global>
+	@tailwind utilities;
+	@tailwind components;
+	@tailwind base;
+</style>

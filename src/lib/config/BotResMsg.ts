@@ -1,5 +1,7 @@
-const BotResMsg = (status, blocks) => {
-    let res = {}
+import type { Block } from '../types/messages'
+
+const BotResMsg = (status: string, blocks?: Block[]) => {
+    let res: Block[] = []
     switch (status) {
         case ('/menu'):
             res = [
@@ -48,9 +50,8 @@ const BotResMsg = (status, blocks) => {
         case ('/create-meeting:success'): 
             res = [
                 {
-                    message: 'You created the meeting'
+                    message: 'Thank you for that, let’s schedule the meeting now!'
                 },
-                ...blocks
             ]
             break
         default:
@@ -62,6 +63,9 @@ const BotResMsg = (status, blocks) => {
                 }
             ]     
     }
+
+    if (blocks)
+        return [...res, ...blocks]
 
     return res
 }

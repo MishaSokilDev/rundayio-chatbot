@@ -1,16 +1,18 @@
-<script>
+<script lang="ts">
     import { tick } from "svelte";
     import { createEventDispatcher } from 'svelte';
 
     import SelectTime from './SelectTime.svelte'
 
-    export let messages = []
+    import type { Messages } from '../types/messages'
+
+    export let messages:Messages[] = []
     export let isLoading = false
     export let isChooseTime = false
 
     const dispatch = createEventDispatcher();
 
-    let container
+    let container: HTMLElement
 
     const scrollToBottom = async () => {
         if (container) {
@@ -24,7 +26,7 @@
             scrollToBottom()
     }
 
-    const btnClicked = (val) => {
+    const commandClicked = (val: string) => {
         dispatch('command-clicked', '/' + val.toLowerCase().replace(/\s/g, '-'))
     }
 </script>
@@ -42,14 +44,14 @@
                     {#if message}
                         <p class="px-[12px] py-[10px] bg-[#E8E8E8] rounded-lg rounded-tl-none text-sm font-medium" 
                             class:user-message={isUser}
-                            class:text-blue-600={message.includes('/')}>
-                            {message}
+                            class:text-blue-600={message[0] === '/'}>
+                            {@html message}
                         </p>
                     {/if}
                     {#if commands && commands[0]}
                         <div class="flex flex-wrap gap-2 justify-center">
                             {#each commands as value}
-                                <button on:click={() => btnClicked(value)}
+                                <button on:click={() => commandClicked(value)}
                                     class="border-2 border-blue-400 rounded-full px-2.5 py-1 bg-blue-100 font-semibold text-blue-800">
                                     {value}
                                 </button>
@@ -62,7 +64,7 @@
                         </a>
                     {/if}   
                     {#if button}
-                        <button on:click={button.callback} class="w-full rounded-lg font-semibold text-lg py-3 bg-blue-500 text-white">
+                        <button on:click={button.callback} class="w-full rounded-lg font-semibold py-3 bg-blue-500 text-white">
                             {button.title}
                         </button>
                     {/if}
